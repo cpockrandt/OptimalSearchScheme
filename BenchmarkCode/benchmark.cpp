@@ -150,9 +150,10 @@ void BM_EditDistance(benchmark::State& state, TSearchScheme scheme)
     }
 }
 
-//template <typename TPredictify>
-void BM_010Seeds(benchmark::State& state, uint8_t const maxErrors, bool const indels_param/*, TPredictify & predictify*/)
+void BM_010Seeds(benchmark::State& state, uint8_t const maxErrors)
 {
+    bool const indels_param = false;
+
     TIter it(fm_index);
 
     uint64_t hitsNbr, uniqueHits;
@@ -181,29 +182,16 @@ void BM_010Seeds(benchmark::State& state, uint8_t const maxErrors, bool const in
         for (unsigned i = 0; i < length(reads); ++i)
         {
             uint64_t oldHits = hitsNbr;
-            search(delegate, it, predictify, maxErrors, reads[i], indels_param); // no indels
+            search(delegate, it, predictify, maxErrors, reads[i], indels_param);
             reverseComplement(reads[i]);
-            search(delegate, it, predictify, maxErrors, reads[i], indels_param); // no indels
+            search(delegate, it, predictify, maxErrors, reads[i], indels_param);
             benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
         }
         std::cout << "Hits 01*0: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
-        // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. "
-        //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
 }
 
-    /*auto predictify = [] (auto const &it,
-                          DnaString const &pattern,
-                          signed const pos_left,
-                          signed const pos_right,
-                          unsigned long const errorsAllowed,
-                          unsigned const errorsLeft,
-                          bool const indels)
-    {
-        return false;//(countOccurrences(it) < 5);// //TODO predict-Schlater
-    };*/
-
-BENCHMARK_CAPTURE(BM_010Seeds, 1, false, (uint8_t)1)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds, 1, (uint8_t)1)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking  , (uint8_t)1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_parts_k_plus_1, PaperOptimumSearchSchemes<1>::VALUE_plus_one)->Unit(benchmark::kMillisecond);

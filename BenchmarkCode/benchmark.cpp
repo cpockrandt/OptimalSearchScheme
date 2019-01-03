@@ -2,6 +2,7 @@
 #include <seqan/arg_parse.h>
 #include <seqan/index.h>
 #include <seqan/seq_io.h>
+#include "bav.h"
 
 #include <type_traits>
 
@@ -46,6 +47,7 @@ void BM_HammingDistance(benchmark::State& state, uint8_t const maxErrors)
         }
         // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. "
         //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+        std::cout << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
 }
 
@@ -147,6 +149,61 @@ void BM_EditDistance(benchmark::State& state, TSearchScheme scheme)
         //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
 }
+
+//template <typename TPredictify>
+void BM_010Seeds(benchmark::State& state, uint8_t const maxErrors, bool const indels_param/*, TPredictify & predictify*/)
+{
+    TIter it(fm_index);
+
+    uint64_t hitsNbr, uniqueHits;
+    auto delegate = [&hitsNbr](auto const textpos) {
+        ++hitsNbr;
+        //unsigned x = textpos.i2;
+        //for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
+        //    x += getOccurrences(it)[i].i2;
+    };
+
+    auto predictify = [] (auto const &it,
+                          DnaString const &pattern,
+                          signed const pos_left,
+                          signed const pos_right,
+                          unsigned long const errorsAllowed,
+                          unsigned const errorsLeft,
+                          bool const indels)
+    {
+        return false;//(countOccurrences(it) < 5);// //TODO predict-Schlater
+    };
+
+    for (auto _ : state)
+    {
+        hitsNbr = 0;
+        uniqueHits = 0;
+        for (unsigned i = 0; i < length(reads); ++i)
+        {
+            uint64_t oldHits = hitsNbr;
+            search(delegate, it, predictify, maxErrors, reads[i], indels_param); // no indels
+            reverseComplement(reads[i]);
+            search(delegate, it, predictify, maxErrors, reads[i], indels_param); // no indels
+            benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
+        }
+        std::cout << "Hits 01*0: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+        // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. "
+        //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+    }
+}
+
+    /*auto predictify = [] (auto const &it,
+                          DnaString const &pattern,
+                          signed const pos_left,
+                          signed const pos_right,
+                          unsigned long const errorsAllowed,
+                          unsigned const errorsLeft,
+                          bool const indels)
+    {
+        return false;//(countOccurrences(it) < 5);// //TODO predict-Schlater
+    };*/
+
+BENCHMARK_CAPTURE(BM_010Seeds, 1, false, (uint8_t)1)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking  , (uint8_t)1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_parts_k_plus_1, PaperOptimumSearchSchemes<1>::VALUE_plus_one)->Unit(benchmark::kMillisecond);

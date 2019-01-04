@@ -212,7 +212,7 @@ BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pLeft, (uint8_t)1, false, predictify_l
 BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pRight, (uint8_t)1, false, predictify_right)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pOcc320, (uint8_t)1, false, predictify_occ320)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pOcc160, (uint8_t)1, false, predictify_occ160)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pOcc80, (uint8_t)1, false, predictify_occ60)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pOcc80, (uint8_t)1, false, predictify_occ80)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pOcc40, (uint8_t)1, false, predictify_occ40)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pOcc20, (uint8_t)1, false, predictify_occ20)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_1error_pOcc5, (uint8_t)1, false, predictify_occ5)->Unit(benchmark::kMillisecond);
@@ -225,7 +225,7 @@ BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pLeft, (uint8_t)2, false, predictify_l
 BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pRight, (uint8_t)2, false, predictify_right)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pOcc320, (uint8_t)2, false, predictify_occ320)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pOcc160, (uint8_t)2, false, predictify_occ160)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pOcc80, (uint8_t)2, false, predictify_occ60)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pOcc80, (uint8_t)2, false, predictify_occ80)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pOcc40, (uint8_t)2, false, predictify_occ40)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pOcc20, (uint8_t)2, false, predictify_occ20)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_2error_pOcc5, (uint8_t)2, false, predictify_occ5)->Unit(benchmark::kMillisecond);
@@ -238,7 +238,7 @@ BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pLeft, (uint8_t)3, false, predictify_l
 BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pRight, (uint8_t)3, false, predictify_right)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pOcc320, (uint8_t)3, false, predictify_occ320)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pOcc160, (uint8_t)3, false, predictify_occ160)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pOcc80, (uint8_t)3, false, predictify_occ60)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pOcc80, (uint8_t)3, false, predictify_occ80)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pOcc40, (uint8_t)3, false, predictify_occ40)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pOcc20, (uint8_t)3, false, predictify_occ20)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds, 010_3error_pOcc5, (uint8_t)3, false, predictify_occ5)->Unit(benchmark::kMillisecond);

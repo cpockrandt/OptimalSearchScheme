@@ -230,6 +230,18 @@ BENCHMARK_CAPTURE(BM_HammingDistance, errors_3_010_ss            , VrolandOptimu
 BENCHMARK_CAPTURE(BM_010Seeds       , errors_3_010_jan_uni       , (uint8_t)3, false, predictify_unidirectional)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds       , errors_3_010_jan_bi        , (uint8_t)3, false, predictify_bidirectional)->Unit(benchmark::kMillisecond);
 
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_backtracking      , (uint8_t)4)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_pig               , PigeonholeOptimumSearchSchemes<4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_oss_parts_k_plus_1, PaperOptimumSearchSchemes<4>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_oss_parts_k_plus_2, PaperOptimumSearchSchemes<4>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_oss_parts_k_plus_3, PaperOptimumSearchSchemes<4>::VALUE_plus_three)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_kuc_parts_k_plus_1, KucherovOptimumSearchSchemes<4>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_kuc_parts_k_plus_2, KucherovOptimumSearchSchemes<4>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_top               , OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_010_ss            , VrolandOptimumSearchSchemes<4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds       , errors_4_010_jan_uni       , (uint8_t)4, false, predictify_unidirectional)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds       , errors_4_010_jan_bi        , (uint8_t)4, false, predictify_bidirectional)->Unit(benchmark::kMillisecond);
+
 
 
 BENCHMARK_CAPTURE(BM_EditDistance, errors_1_backtracking      , (uint8_t)1)->Unit(benchmark::kMillisecond);
@@ -265,6 +277,18 @@ BENCHMARK_CAPTURE(BM_EditDistance, errors_3_top               , OptimalSearchSch
 BENCHMARK_CAPTURE(BM_EditDistance, errors_3_010_ss            , VrolandOptimumSearchSchemes<3>::VALUE)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds    , errors_3_010_jan_uni       , (uint8_t)3, true, predictify_unidirectional)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_010Seeds    , errors_3_010_jan_bi        , (uint8_t)3, true, predictify_bidirectional)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_backtracking      , (uint8_t)4)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_pig               , PigeonholeOptimumSearchSchemes<4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_oss_parts_k_plus_1, PaperOptimumSearchSchemes<4>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_oss_parts_k_plus_2, PaperOptimumSearchSchemes<4>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_oss_parts_k_plus_1, PaperOptimumSearchSchemes<4>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_kuc_parts_k_plus_2, KucherovOptimumSearchSchemes<4>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_kuc_parts_k_plus_3, KucherovOptimumSearchSchemes<4>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_top               , OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_EditDistance, errors_4_010_ss            , VrolandOptimumSearchSchemes<4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds    , errors_4_010_jan_uni       , (uint8_t)4, true, predictify_unidirectional)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_010Seeds    , errors_4_010_jan_bi        , (uint8_t)4, true, predictify_bidirectional)->Unit(benchmark::kMillisecond);
 
 // BENCHMARK_MAIN();
 int main(int argc, char** argv)

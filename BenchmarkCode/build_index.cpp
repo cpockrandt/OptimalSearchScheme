@@ -1,5 +1,9 @@
 #include "common.h"
 
+#include "lambda/src/mkindex_saca.hpp"
+#include "lambda/src/mkindex_misc.hpp"
+#include "lambda/src/mkindex_algo.hpp"
+
 #include <seqan/arg_parse.h>
 #include <seqan/index.h>
 #include <seqan/seq_io.h>
@@ -41,7 +45,8 @@ int main(int argc, char *argv[])
 
     // Build and save index
     TIndex index(genome);
-    indexCreate(index, FibreSALF());
+    indexCreateProgress(index, FibreSALF());
+    // indexCreate(index, FibreSALF());
     save(index, toCString(indexPath));
 
     cout << "Index created successfully" << endl;

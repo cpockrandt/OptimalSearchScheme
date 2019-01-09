@@ -415,3 +415,73 @@ struct VrolandOptimumSearchSchemes<4, TVoidType>
 
 template <typename TVoidType>
 constexpr std::array<OptimalSearch<6>, 15> VrolandOptimumSearchSchemes<4, TVoidType>::VALUE;
+
+
+///////////////////////////////
+
+template <size_t max, typename TVoidType = void>
+struct VrolandMergedOptimumSearchSchemes;
+
+template <typename TVoidType>
+struct VrolandMergedOptimumSearchSchemes<1, TVoidType>
+{
+    static constexpr std::array<OptimalSearch<3>, 2> VALUE
+    {{
+        { {{1, 2, 3}}, {{0, 0, 0}}, {{0, 1, 1}}, {{0, 0, 0}}, 0}, // 00*, 010
+        { {{2, 3, 1}}, {{0, 0, 0}}, {{0, 0, 1}}, {{0, 0, 0}}, 0}  // *00
+    }};
+};
+
+template <typename TVoidType>
+constexpr std::array<OptimalSearch<3>, 2> VrolandMergedOptimumSearchSchemes<1, TVoidType>::VALUE;
+
+
+
+template <typename TVoidType>
+struct VrolandMergedOptimumSearchSchemes<2, TVoidType>
+{
+    static constexpr std::array<OptimalSearch<4>, 3> VALUE
+    {{
+        { {{1, 2, 3, 4}}, {{0, 0, 0, 0}}, {{0, 1, 2, 2}}, {{0, 0, 0, 0}}, 0}, // 00**,  010*, 0110
+        { {{2, 3, 4, 1}}, {{0, 0, 0, 0}}, {{0, 1, 2, 2}}, {{0, 0, 0, 0}}, 0}, // *00*, *010
+        { {{3, 4, 2, 1}}, {{0, 0, 0, 0}}, {{0, 0, 2, 2}}, {{0, 0, 0, 0}}, 0}  // **00
+    }};
+};
+
+template <typename TVoidType>
+constexpr std::array<OptimalSearch<4>, 3> VrolandMergedOptimumSearchSchemes<2, TVoidType>::VALUE;
+
+
+
+template <typename TVoidType>
+struct VrolandMergedOptimumSearchSchemes<3, TVoidType>
+{
+    static constexpr std::array<OptimalSearch<5>, 4> VALUE
+    {{
+        { {{1, 2, 3, 4, 5}}, {{0, 0, 0, 0, 0}}, {{0, 1, 3, 3, 3}}, {{0, 0, 0, 0, 0}}, 0}, // 00***, 010**, 0110*, 01110
+        { {{2, 3, 4, 5, 1}}, {{0, 0, 0, 0, 0}}, {{0, 1, 3, 3, 3}}, {{0, 0, 0, 0, 0}}, 0}, // *00**, *010*, *0110
+        { {{3, 4, 5, 2, 1}}, {{0, 0, 0, 0, 0}}, {{0, 1, 3, 3, 3}}, {{0, 0, 0, 0, 0}}, 0}, // **00*, **010
+        { {{4, 5, 3, 2, 1}}, {{0, 0, 0, 0, 0}}, {{0, 0, 3, 3, 3}}, {{0, 0, 0, 0, 0}}, 0}  // ***00
+    }};
+};
+
+template <typename TVoidType>
+constexpr std::array<OptimalSearch<5>, 4> VrolandMergedOptimumSearchSchemes<3, TVoidType>::VALUE;
+
+
+
+template <typename TVoidType>
+struct VrolandMergedOptimumSearchSchemes<4, TVoidType>
+{
+    static constexpr std::array<OptimalSearch<6>, 5> VALUE
+    {{
+        { {{1, 2, 3, 4, 5, 6}}, {{0, 0, 0, 0, 0, 0}}, {{0, 1, 4, 4, 4, 4}}, {{0, 0, 0, 0, 0, 0}}, 0}, // 00****, 010***, 0110**, 01110*, 011110
+        { {{2, 3, 4, 5, 6, 1}}, {{0, 0, 0, 0, 0, 0}}, {{0, 1, 4, 4, 4, 4}}, {{0, 0, 0, 0, 0, 0}}, 0}, // *00***, *010**, *0110*, *01110
+        { {{3, 4, 5, 6, 2, 1}}, {{0, 0, 0, 0, 0, 0}}, {{0, 1, 4, 4, 4, 4}}, {{0, 0, 0, 0, 0, 0}}, 0}, // **00**, **010*, **0110
+        { {{4, 5, 6, 3, 2, 1}}, {{0, 0, 0, 0, 0, 0}}, {{0, 1, 4, 4, 4, 4}}, {{0, 0, 0, 0, 0, 0}}, 0}, // ***00*, ***010
+        { {{5, 6, 4, 3, 2, 1}}, {{0, 0, 0, 0, 0, 0}}, {{0, 0, 4, 4, 4, 4}}, {{0, 0, 0, 0, 0, 0}}, 0}  // ****00
+    }};
+};
+
+template <typename TVoidType>
+constexpr std::array<OptimalSearch<6>, 5> VrolandMergedOptimumSearchSchemes<4, TVoidType>::VALUE;

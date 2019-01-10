@@ -948,10 +948,11 @@ inline void _optimalSearchScheme(TContex & ossContext,
         _optimalSearchScheme(ossContext, delegate, delegateDirect, it, bitvectors, s, needle, needleId, TDistanceTag());
 }
 
-template <size_t minErrors, size_t maxErrors,
+template </*size_t minErrors, size_t maxErrors,*/
           typename TContex,
           typename TDelegate, typename TDelegateD,
-          typename TText, typename TIndexSpec,
+          typename TText, typename TIndex, typename TIndexSpec,
+//           typename TText, typename TIndexSpec,
           typename TBitvector,
           size_t nbrBlocks, size_t N,
           typename TChar, typename TStringSpec,
@@ -960,7 +961,8 @@ inline void
 find(TContex & ossContext,
      TDelegate & delegate,
      TDelegateD & delegateDirect,
-     Index<TText, BidirectionalIndex<TIndexSpec> > & index,
+     Iter<Index<TText, BidirectionalIndex<TIndex> >, VSTree<TopDown<TIndexSpec> > > it,
+//      Index<TText, BidirectionalIndex<TIndexSpec> > & index,
      std::vector<TBitvector> & bitvectors,
      std::array<OptimalSearch<nbrBlocks>, N> const & ss,
      String<TChar, TStringSpec> const & needle,
@@ -973,9 +975,9 @@ find(TContex & ossContext,
    _optimalSearchSchemeComputeFixedBlocklength(scheme, length(needle));
    _optimalSearchSchemeComputeChronBlocklength(scheme);
 
-    Iter<Index<TText, BidirectionalIndex<TIndexSpec> >, VSTree<TopDown<> > > it(index);
+//     Iter<Index<TText, BidirectionalIndex<TIndexSpec> >, VSTree<TopDown<> > > it(index);
 
-    _optimalSearchScheme(ossContext, delegate, delegateDirect, it, bitvectors, ss, needle, needleId, TDistanceTag());
+   _optimalSearchScheme(ossContext, delegate, delegateDirect, it, bitvectors, ss, needle, needleId, TDistanceTag());
 }
 /*
 

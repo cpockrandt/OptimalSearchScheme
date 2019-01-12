@@ -9,6 +9,39 @@
 
 namespace seqan{
 
+template <typename T>
+void printv(T a){
+    for(int i = 0; i < a.size(); ++i){
+        std::cout << static_cast<int> (a.at(i)) << ", ";
+    }
+    std::cout << "\n";
+}
+
+template <size_t nbrBlocks>
+void print_search(OptimalSearch<nbrBlocks> const & s){
+        std::cout << "Search sscheme: " << (int)s.id << "\n";
+        std::cout << "Permutation: " << "\n";
+        printv(s.pi);
+        std::cout << "Lower bound: " << "\n";
+        printv(s.l);
+        std::cout << "Upper bound: " << "\n";
+        printv(s.u);
+        std::cout << "blockLengths: " << "\n";
+        printv(s.blocklength);
+        std::cout << "chronblockLengths: " << "\n";
+        printv(s.chronBL);
+        std::cout << "revchronblockLengths: " << "\n";
+        printv(s.revChronBL);
+        std::cout << "start Pos: " << "\n";
+        std::cout << s.startPos << "\n";
+        std::cout << "minMax: " << "\n";
+        printv(s.min);
+        printv(s.max);
+        std::cout << "OneDirection" << "\n" << (int)s.startUniDir << "\n";
+        std::cout << "\n";
+
+}
+
 template<typename TVector, typename TVSupport,
          typename TSAValue>
 inline TVector & getTVector(std::vector<std::pair<TVector, TVSupport> > & bitvectors,
@@ -190,6 +223,7 @@ inline void directSearch(TContex & ossContext,
                          TDir const & ,
                          TDistanceTag const &)
 {
+    std::cout << "ITV\n";
     auto const & genome = indexText(*iter.fwdIter.index);
 
     if (std::is_same<TDistanceTag, EditDistance>::value){
@@ -599,6 +633,7 @@ inline void _optimalSearchSchemeDeletion(TContex & ossContext,
                                          bool const lastEdit,
                                          TDir const & )
 {
+    std::cout << "Del\n";
     uint8_t const maxErrorsLeftInBlock = s.u[blockIndex] - errors;
     uint8_t const minErrorsLeftInBlock = (s.l[blockIndex] > errors) ? (s.l[blockIndex] - errors) : 0;
 
@@ -820,9 +855,13 @@ inline void _optimalSearchScheme(TContex & ossContext,
     bool const atBlockEnd = (blockIndex > 0) ? needleRightPos - needleLeftPos - 1 == s.blocklength[blockIndex - 1] : false;        //is not true if we finished needle
     bool const checkMappa = !bitvectors.empty();
 
+//     print_search(s);
+//     std::cout << "Check if done\n";
+//     std::cout << minErrorsLeftInBlock << "\tNPL: " << needleLeftPos << "\tNRP: " << needleRightPos << "\n";
     // Done. (Last step)
     if (done)
     {
+//         std::cout << "Done: " << "\n";
         //last input only matters for unidirectional searches (has to be false in this case)
         if(true){
             if(checkMappa){
@@ -836,7 +875,6 @@ inline void _optimalSearchScheme(TContex & ossContext,
         return;
     }
 
-    //TODO add minErrorsLeftInBlock == 0 so only we check once after an insertion
 
 //     if(atBlockEnd && checkMappa){
 //         ReturnCode rcode = checkMappability(ossContext, delegate, delegateDirect, iter, needle, needleId, bitvectors, needleLeftPos, needleRightPos, errors, s, blockIndex, lastEdit, TDir(), TDistanceTag());
@@ -944,8 +982,10 @@ inline void _optimalSearchScheme(TContex & ossContext,
 {
 
 
-    for (auto & s : ss)
+    for (auto & s : ss){
+//         print_search(s);
         _optimalSearchScheme(ossContext, delegate, delegateDirect, it, bitvectors, s, needle, needleId, TDistanceTag());
+    }
 }
 
 template </*size_t minErrors, size_t maxErrors,*/
@@ -977,7 +1017,7 @@ find(TContex & ossContext,
 
 //     Iter<Index<TText, BidirectionalIndex<TIndexSpec> >, VSTree<TopDown<> > > it(index);
 
-   _optimalSearchScheme(ossContext, delegate, delegateDirect, it, bitvectors, ss, needle, needleId, TDistanceTag());
+   _optimalSearchScheme(ossContext, delegate, delegateDirect, it, bitvectors, scheme, needle, needleId, TDistanceTag());
 }
 /*
 
@@ -1288,6 +1328,7 @@ inline void find(const int minErrors,
 }*/
 
 }
+
 
 
 

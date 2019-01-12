@@ -41,6 +41,7 @@ void OSS_HammingDistance(benchmark::State& state, uint8_t const maxErrors, TSear
 {
     typedef HammingDistance TDistanceTag;
     OSSContext ossContext;
+    ossContext.itv = false;
 
     TIter it(fm_index);
 
@@ -48,6 +49,7 @@ void OSS_HammingDistance(benchmark::State& state, uint8_t const maxErrors, TSear
 
     auto delegate = [&hitsNbr](OSSContext & ossContext, auto const & it, DnaString const & /*needle*/, uint32_t const /*needleId*/, uint8_t /*errors*/, bool const /*rev*/)
     {
+//         std::cout << "Delegate\n";
         ++hitsNbr;
         unsigned x = 0;
         for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
@@ -71,6 +73,7 @@ void OSS_HammingDistance(benchmark::State& state, uint8_t const maxErrors, TSear
 
         for (unsigned i = 0; i < length(reads); ++i)
         {
+//             std::cout << "Iter: " << i << "\n";
             uint64_t oldHits = hitsNbr;
 //             find(0, maxErrors, myOSSContext, delegate, delegateDirect, fm_index, reads[i], HammingDistance());
 
@@ -82,8 +85,8 @@ void OSS_HammingDistance(benchmark::State& state, uint8_t const maxErrors, TSear
 
             benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
         }
-        // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. "
-        //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+        // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. ";
+        std::cout       << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
 }
 
@@ -118,6 +121,7 @@ void BM_HammingDistance(benchmark::State& state, uint8_t const maxErrors)
         }
         // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. "
         //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+        std::cout       << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
 }
 
@@ -131,6 +135,7 @@ void BM_HammingDistance(benchmark::State& state, TSearchScheme scheme)
 
     uint64_t hitsNbr, uniqueHits;
     auto delegate = [&hitsNbr](auto const &it, DnaString const & /*read*/, unsigned const errors = 0) {
+//         std::cout << "Delegate\n";
         ++hitsNbr;
         unsigned x = 0;
         for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
@@ -144,14 +149,15 @@ void BM_HammingDistance(benchmark::State& state, TSearchScheme scheme)
         uniqueHits = 0;
         for (unsigned i = 0; i < length(reads); ++i)
         {
-            std:cout << i << "\n";
+//             std::cout << "Read: " << reads[i] << "\n";
             uint64_t oldHits = hitsNbr;
             _optimalSearchScheme(delegate, it, reads[i], scheme, TDistanceTag());
             reverseComplement(reads[i]);
             _optimalSearchScheme(delegate, it, reads[i], scheme, TDistanceTag());
             benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
         }
-        std::cout << "Hits SS: " << uniqueHits << " (" << hitsNbr << ")" << std::endl; // Hits compare
+        std::cout       << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+//         std::cout << "Hits SS: " << uniqueHits << " (" << hitsNbr << ")" << std::endl; // Hits compare
         // std::cout << "Opt.-Schemes: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. "
         //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
@@ -269,13 +275,14 @@ auto predictify_unidirectional = [] (auto const &it, DnaString const &pattern, s
 };
 
 
-BENCHMARK_CAPTURE(OSS_HammingDistance, OSS               , (uint8_t)1, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_HammingDistance, OSS               , (uint8_t)1, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+
+// BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking      , (uint8_t)1)->Unit(benchmark::kMillisecond);
 /*
-BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking      , (uint8_t)1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_pig               , PigeonholeOptimumSearchSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_1, PaperOptimumSearchSchemes<1>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_2, PaperOptimumSearchSchemes<1>::VALUE_plus_two)->Unit(benchmark::kMillisecond);*/
-// BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_3, PaperOptimumSearchSchemes<1>::VALUE_plus_three)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_2, PaperOptimumSearchSchemes<1>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+// BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_3, PaperOptimumSearchSchemes<1>::VALUE_plus_three)->Unit(benchmark::kMillisecond);*/
 // BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_top               , OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
 // BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_010_ss            , VrolandOptimumSearchSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
 // BENCHMARK_CAPTURE(BM_010Seeds       , errors_1_010_jan_uni       , (uint8_t)1, false, predictify_unidirectional)->Unit(benchmark::kMillisecond);

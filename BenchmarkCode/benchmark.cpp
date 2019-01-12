@@ -32,16 +32,16 @@ public:
                       OptimalSearch<nbrBlocks> const & s,
                       uint8_t const blockIndex)
     {
-        return(itv && iter.fwdIter.vDesc.range.i2 - iter.fwdIter.vDesc.range.i1 < (s.pi.size() - blockIndex - 1 + 0) * 2);
+        return(itv/* && iter.fwdIter.vDesc.range.i2 - iter.fwdIter.vDesc.range.i1 < (s.pi.size() - blockIndex - 1 + 0) * 2*/);
     }
 };
 
 template <class TSearchScheme>
-void OSS_HammingDistance(benchmark::State& state, uint8_t const maxErrors, TSearchScheme scheme)
+void OSS_HammingDistance(benchmark::State& state, bool const itv, TSearchScheme scheme)
 {
     typedef HammingDistance TDistanceTag;
     OSSContext ossContext;
-    ossContext.itv = false;
+    ossContext.itv = itv;
 
     TIter it(fm_index);
 
@@ -275,12 +275,19 @@ auto predictify_unidirectional = [] (auto const &it, DnaString const &pattern, s
 };
 
 
-BENCHMARK_CAPTURE(OSS_HammingDistance, OSS               , (uint8_t)1, OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_HammingDistance, errors_1_OSS               , false, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_HammingDistance, errors_1_OSS_itv              , true, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
 
+BENCHMARK_CAPTURE(OSS_HammingDistance, errors_2_OSS               , false, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_HammingDistance, errors_2_OSS_itv           , true, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_CAPTURE(OSS_HammingDistance, errors_3_OSS               , false, OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_HammingDistance, errors_3_OSS_itv           , true, OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
+/*
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking      , (uint8_t)1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_pig               , PigeonholeOptimumSearchSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_1, PaperOptimumSearchSchemes<1>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_2, PaperOptimumSearchSchemes<1>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_2, PaperOptimumSearchSchemes<1>::VALUE_plus_two)->Unit(benchmark::kMillisecond);*/
 // BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_3, PaperOptimumSearchSchemes<1>::VALUE_plus_three)->Unit(benchmark::kMillisecond);
 // BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_top               , OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
 // BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_010_ss            , VrolandOptimumSearchSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);

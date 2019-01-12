@@ -71,6 +71,11 @@ void OSS_HammingDistance(benchmark::State& state, bool const itv, TSearchScheme 
         std::vector<std::pair<TBitvector, TSupport>> empty_bitvectors;
         calcConstParameters(scheme);
 
+        for (auto & s : scheme){
+            print_search(s);
+            cout << "\n\n";
+        }
+
         for (unsigned i = 0; i < length(reads); ++i)
         {
             if(i % 10000 != 0)

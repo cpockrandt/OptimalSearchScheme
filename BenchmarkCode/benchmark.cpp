@@ -32,7 +32,7 @@ public:
                       OptimalSearch<nbrBlocks> const & s,
                       uint8_t const blockIndex)
     {
-        return(itv/* && iter.fwdIter.vDesc.range.i2 - iter.fwdIter.vDesc.range.i1 < (s.pi.size() - blockIndex - 1 + 0) * 2*/);
+        return(itv && blockIndex > 0/* && iter.fwdIter.vDesc.range.i2 - iter.fwdIter.vDesc.range.i1 < (s.pi.size() - blockIndex - 1 + 0) * 2*/);
     }
 };
 

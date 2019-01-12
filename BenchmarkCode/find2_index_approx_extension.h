@@ -223,7 +223,7 @@ inline void directSearch(TContex & ossContext,
                          TDir const & ,
                          TDistanceTag const &)
 {
-    std::cout << "ITV\n";
+//     std::cout << "ITV\n";
     auto const & genome = indexText(*iter.fwdIter.index);
 
     if (std::is_same<TDistanceTag, EditDistance>::value){
@@ -633,7 +633,7 @@ inline void _optimalSearchSchemeDeletion(TContex & ossContext,
                                          bool const lastEdit,
                                          TDir const & )
 {
-    std::cout << "Del\n";
+//     std::cout << "Del\n";
     uint8_t const maxErrorsLeftInBlock = s.u[blockIndex] - errors;
     uint8_t const minErrorsLeftInBlock = (s.l[blockIndex] > errors) ? (s.l[blockIndex] - errors) : 0;
 

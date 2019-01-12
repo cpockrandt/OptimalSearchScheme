@@ -73,6 +73,11 @@ void OSS_HammingDistance(benchmark::State& state, bool const itv, TSearchScheme 
 
         for (unsigned i = 0; i < length(reads); ++i)
         {
+            if(i % 1000000 != 0)
+                continue;
+            if(itv)
+                std::cout << "Iteration: " << i << "\n";
+
 //             std::cout << "Iter: " << i << "\n";
             uint64_t oldHits = hitsNbr;
 //             find(0, maxErrors, myOSSContext, delegate, delegateDirect, fm_index, reads[i], HammingDistance());

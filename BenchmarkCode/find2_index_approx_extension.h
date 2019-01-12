@@ -39,7 +39,6 @@ void print_search(OptimalSearch<nbrBlocks> const & s){
         printv(s.max);
         std::cout << "OneDirection" << "\n" << (int)s.startUniDir << "\n";
         std::cout << "\n";
-
 }
 
 template<typename TVector, typename TVSupport,

@@ -117,12 +117,13 @@ void BM_HammingDistance(benchmark::State& state, uint8_t const maxErrors)
 
     for (auto _ : state)
     {
-        if(i % 10000 != 0)
-            continue;
         hitsNbr = 0;
         uniqueHits = 0;
         for (unsigned i = 0; i < length(reads); ++i)
         {
+            if(i % 10000 != 0)
+                continue;
+
             uint64_t oldHits = hitsNbr;
             _findBacktracking(it.revIter, reads[i], begin(reads[i], Standard()), 0, (signed) maxErrors, delegate,
                               TDistanceTag());

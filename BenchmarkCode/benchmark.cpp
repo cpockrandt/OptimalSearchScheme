@@ -1,3 +1,4 @@
+
 #include <benchmark/benchmark.h>
 #include <seqan/arg_parse.h>
 #include <seqan/index.h>
@@ -18,11 +19,12 @@ typedef Iter<TIndex, VSTree<TopDown<> > > TIter;
 TIndex fm_index;
 StringSet<DnaString> reads;
 
+uint64_t no_verifications;
 
-class OSSContext
+/*class OSSContext
 {
 public:
-    bool itv = true;
+    constexpr bool itv = true;
     template <typename TText, typename TIndex, typename TIndexSpec,
               size_t nbrBlocks>
     bool itvConditionComp(Iter<Index<TText, BidirectionalIndex<TIndex> >, VSTree<TopDown<TIndexSpec> > > iter,
@@ -32,72 +34,51 @@ public:
                       OptimalSearch<nbrBlocks> const & s,
                       uint8_t const blockIndex)
     {
-        return(itv && blockIndex > 0/* && iter.fwdIter.vDesc.range.i2 - iter.fwdIter.vDesc.range.i1 < (s.pi.size() - blockIndex - 1 + 0) * 2*/);
+        return(itv && blockIndex > 0/* && iter.fwdIter.vDesc.range.i2 - iter.fwdIter.vDesc.range.i1 < (s.pi.size() - blockIndex - 1 + 0) * 2* /);
     }
-};
+};*/
 
-template <class TSearchScheme>
-void OSS_HammingDistance(benchmark::State& state, bool const itv, TSearchScheme scheme)
+template <typename TOSSContext, typename TSearchScheme>
+void OSS_AnyDistance(benchmark::State& state, TOSSContext & ossContext, TSearchScheme scheme)
 {
     typedef HammingDistance TDistanceTag;
-    OSSContext ossContext;
-    ossContext.itv = itv;
 
     TIter it(fm_index);
 
     uint64_t hitsNbr, uniqueHits;
 
-    auto delegate = [&hitsNbr](OSSContext & ossContext, auto const & it, DnaString const & /*needle*/, uint32_t const /*needleId*/, uint8_t /*errors*/, bool const /*rev*/)
+    auto delegate = [&hitsNbr](TOSSContext & /*ossContext*/, auto const & it, DnaString const & /*needle*/, uint32_t const /*needleId*/, uint8_t /*errors*/, bool const /*rev*/)
     {
-//         std::cout << "Delegate\n";
         ++hitsNbr;
         unsigned x = 0;
         for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
             x += getOccurrences(it)[i].i2;
     };
-    auto delegateDirect = [&hitsNbr](OSSContext & ossContext, Pair<uint16_t, uint32_t> const & pos, Pair<uint16_t, uint32_t> const & posEnd, DnaString const & needle, uint32_t const needleId, uint8_t const errors)
+    auto delegateDirect = [&hitsNbr](TOSSContext & /*ossContext*/, Pair<uint16_t, uint32_t> const & pos, Pair<uint16_t, uint32_t> const & posEnd, DnaString const & needle, uint32_t const needleId, uint8_t const errors)
     {
         ++hitsNbr;
-        unsigned x = pos.i2;
+        //unsigned x = pos.i2;
     };
 
-//     auto scheme = OptimalSearchSchemes<minErrors, maxErrors>::VALUE;
-
+    std::vector<std::pair<TBitvector, TSupport>> empty_bitvectors;
+    calcConstParameters(scheme);
     for (auto _ : state)
     {
         hitsNbr = 0;
         uniqueHits = 0;
-
-        std::vector<std::pair<TBitvector, TSupport>> empty_bitvectors;
-        calcConstParameters(scheme);
-
-        for (auto & s : scheme){
-            print_search(s);
-            cout << "\n\n";
-        }
-
+        no_verifications = 0;
         for (unsigned i = 0; i < length(reads); ++i)
         {
-            if(i % 10000 != 0)
-                continue;
-//             if(itv)
-//                 std::cout << "Iteration: " << i << "\n";
-
-//             std::cout << "Iter: " << i << "\n";
             uint64_t oldHits = hitsNbr;
-//             find(0, maxErrors, myOSSContext, delegate, delegateDirect, fm_index, reads[i], HammingDistance());
-
             find(ossContext, delegate, delegateDirect, it, empty_bitvectors, scheme, reads[i], i, TDistanceTag());
-
             reverseComplement(reads[i]);
-
             find(ossContext, delegate, delegateDirect, it, empty_bitvectors, scheme, reads[i], i, TDistanceTag());
-
             benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
         }
         // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. ";
-        std::cout       << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+        // std::cout       << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
+    std::cout       << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << ": verifications: " << no_verifications << std::endl;
 }
 
 
@@ -145,7 +126,6 @@ void BM_HammingDistance(benchmark::State& state, TSearchScheme scheme)
 
     uint64_t hitsNbr, uniqueHits;
     auto delegate = [&hitsNbr](auto const &it, DnaString const & /*read*/, unsigned const errors = 0) {
-//         std::cout << "Delegate\n";
         ++hitsNbr;
         unsigned x = 0;
         for (unsigned i = 0; i < length(getOccurrences(it)); ++i)
@@ -159,9 +139,6 @@ void BM_HammingDistance(benchmark::State& state, TSearchScheme scheme)
         uniqueHits = 0;
         for (unsigned i = 0; i < length(reads); ++i)
         {
-            if(i % 10000 != 0)
-                continue;
-//             std::cout << "Read: " << reads[i] << "\n";
             uint64_t oldHits = hitsNbr;
             _optimalSearchScheme(delegate, it, reads[i], scheme, TDistanceTag());
             reverseComplement(reads[i]);
@@ -286,24 +263,109 @@ auto predictify_unidirectional = [] (auto const &it, DnaString const &pattern, s
     return pos_right == length(pattern) - 1;
 };
 
+class OSSContextOn
+{
+public:
+    template <typename TText, typename TIndex, typename TIndexSpec, size_t nbrBlocks>
+    bool itvConditionComp(Iter<Index<TText, BidirectionalIndex<TIndex> >, VSTree<TopDown<TIndexSpec> > > iter, uint32_t const needleLeftPos, uint32_t const needleRightPos, uint8_t const errors, OptimalSearch<nbrBlocks> const & s, uint8_t const blockIndex)
+    { return true; //countOccurrences(iter) < 10;
+    }
+};
+OSSContextOn ossContextOn;
 
-BENCHMARK_CAPTURE(OSS_HammingDistance, errors_1_OSS               , false, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(OSS_HammingDistance, errors_1_OSS_itv              , true, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+class OSSContextOff
+{
+public:
+    template <typename TText, typename TIndex, typename TIndexSpec, size_t nbrBlocks>
+    bool itvConditionComp(Iter<Index<TText, BidirectionalIndex<TIndex> >, VSTree<TopDown<TIndexSpec> > > iter, uint32_t const needleLeftPos, uint32_t const needleRightPos, uint8_t const errors, OptimalSearch<nbrBlocks> const & s, uint8_t const blockIndex)
+    { return false; }
+};
+OSSContextOff ossContextOff;
 
-BENCHMARK_CAPTURE(OSS_HammingDistance, errors_2_OSS               , false, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(OSS_HammingDistance, errors_2_OSS_itv           , true, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+template <unsigned occ>
+class OSSContextOcc
+{
+public:
+    template <typename TText, typename TIndex, typename TIndexSpec, size_t nbrBlocks>
+    bool itvConditionComp(Iter<Index<TText, BidirectionalIndex<TIndex> >, VSTree<TopDown<TIndexSpec> > > iter, uint32_t const needleLeftPos, uint32_t const needleRightPos,
+			  uint8_t const errors, OptimalSearch<nbrBlocks> const & s, uint8_t const blockIndex)
+    {
+        if (countOccurrences(iter) < occ)
+        {
+            no_verifications += countOccurrences(iter);
+            return true;
+        }
+        return false;
+        //return countOccurrences(iter) < occ;
+    }
+};
+OSSContextOcc<25> ossContextOcc25;
+//iOSSContextOcc<15> ossContextOcc15;
+OSSContextOcc<50> ossContextOcc50;
 
-BENCHMARK_CAPTURE(OSS_HammingDistance, errors_3_OSS               , false, OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
-BENCHMARK_CAPTURE(OSS_HammingDistance, errors_3_OSS_itv           , true, OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
+template <unsigned blocks>
+class OSSContextIndex
+{
+public:
+    template <typename TText, typename TIndex, typename TIndexSpec, size_t nbrBlocks>
+    bool itvConditionComp(Iter<Index<TText, BidirectionalIndex<TIndex> >, VSTree<TopDown<TIndexSpec> > > iter, uint32_t const needleLeftPos, uint32_t const needleRightPos, uint8_t const errors, OptimalSearch<nbrBlocks> const & s, uint8_t const blockIndex)
+    {
+        //return needleRightPos - needleLeftPos > 95;
+        //return 4*(blockIndex) < countOccurrences(iter);
+        
+        if (blockIndex >= s.pi.size() - blocks)
+        {
+            no_verifications += countOccurrences(iter);
+            return true;
+        }    
+        return false;
+        //return blockIndex >= s.pi.size() - 1;
+    }
+};
+OSSContextIndex<1> ossContextIndex1;
+OSSContextIndex<2> ossContextIndex2;
+OSSContextIndex<3> ossContextIndex3;
 
-BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking      , (uint8_t)1)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_off  , ossContextOff  , OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_on   , ossContextOn  , OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_occ25, ossContextOcc25, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_occ50, ossContextOcc50, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_ind1, ossContextIndex1, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_ind2, ossContextIndex2, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_CAPTURE(OSS_AnyDistance, 2_OSS_itv_off  , ossContextOff  , OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 2_OSS_itv_on   , ossContextOn  , OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 2_OSS_itv_occ25, ossContextOcc25, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 2_OSS_itv_occ50, ossContextOcc50, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 2_OSS_itv_ind1, ossContextIndex1, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 2_OSS_itv_ind2, ossContextIndex2, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 2_OSS_itv_ind3, ossContextIndex3, OptimalSearchSchemes<0, 2>::VALUE)->Unit(benchmark::kMillisecond);
+
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_off  , ossContextOff  , OptimalSearchSchemes<0,3>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_off  , ossContextOff  , PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_on   , ossContextOn  , OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_occ25, ossContextOcc25, PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_occ50, ossContextOcc50, PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_ind1, ossContextIndex1, PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_ind2, ossContextIndex2, OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 3_TOP_itv_ind3, ossContextIndex3, OptimalSearchSchemes<0, 3>::VALUE)->Unit(benchmark::kMillisecond);
+/*
+BENCHMARK_CAPTURE(OSS_AnyDistance, 4_TOP_itv_off  , ossContextOff, OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 4_TOP_itv_on   , ossContextOn  , OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 4_TOP_itv_occ25, ossContextOcc25, OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 4_TOP_itv_occ50, ossContextOcc50, OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 4_TOP_itv_ind1, ossContextIndex1, OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 4_TOP_itv_ind2, ossContextIndex2, OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(OSS_AnyDistance, 4_TOP_itv_ind3, ossContextIndex3, OptimalSearchSchemes<0, 4>::VALUE)->Unit(benchmark::kMillisecond);
+*/
+/*BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking      , (uint8_t)1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_pig               , PigeonholeOptimumSearchSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_1, PaperOptimumSearchSchemes<1>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_2, PaperOptimumSearchSchemes<1>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_oss_parts_k_plus_3, PaperOptimumSearchSchemes<1>::VALUE_plus_three)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_top               , OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_010_ss            , VrolandOptimumSearchSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
-// BENCHMARK_CAPTURE(BM_010Seeds       , errors_1_010_jan_uni       , (uint8_t)1, false, predictify_unidirectional)->Unit(benchmark::kMillisecond);
+*/// BENCHMARK_CAPTURE(BM_010Seeds       , errors_1_010_jan_uni       , (uint8_t)1, false, predictify_unidirectional)->Unit(benchmark::kMillisecond);
 // BENCHMARK_CAPTURE(BM_010Seeds       , errors_1_010_jan_bi        , (uint8_t)1, false, predictify_bidirectional)->Unit(benchmark::kMillisecond);
 //
 // BENCHMARK_CAPTURE(BM_HammingDistance, errors_2_backtracking      , (uint8_t)2)->Unit(benchmark::kMillisecond);

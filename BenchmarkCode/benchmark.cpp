@@ -79,8 +79,7 @@ void BM_HammingDistance(benchmark::State& state, TSearchScheme scheme)
             _optimalSearchScheme(delegate, it, reads[i], scheme, TDistanceTag());
             benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
         }
-        // std::cout << "Opt.-Schemes: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. "
-        //           << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
+        std::cout << "Hits: " << uniqueHits << " (" << hitsNbr << ")" << std::endl;
     }
 }
 
@@ -191,20 +190,36 @@ void BM_010Seeds(benchmark::State& state, uint8_t const maxErrors)
     }
 }
 
-BENCHMARK_CAPTURE(BM_010Seeds, 1, (uint8_t)1)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(BM_010Seeds, 1, (uint8_t)1)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_backtracking  , (uint8_t)1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_parts_k_plus_1, PaperOptimumSearchSchemes<1>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_1_parts_k_plus_2, PaperOptimumSearchSchemes<1>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
 
-BENCHMARK_CAPTURE(BM_HammingDistance, errors_2_backtracking  , (uint8_t)2)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(BM_HammingDistance, errors_2_backtracking  , (uint8_t)2)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, kucerrors_2_parts_k_plus_1, KucherovOptimumSearchSchemes<2>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, kucerrors_2_parts_k_plus_2, KucherovOptimumSearchSchemes<2>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_2_parts_k_plus_1, PaperOptimumSearchSchemes<2>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_2_parts_k_plus_2, PaperOptimumSearchSchemes<2>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
 
-BENCHMARK_CAPTURE(BM_HammingDistance, errors_3_backtracking  , (uint8_t)3)->Unit(benchmark::kMillisecond);
+//BENCHMARK_CAPTURE(BM_HammingDistance, errors_3_backtracking  , (uint8_t)3)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, kucerrors_3_parts_k_plus_1, KucherovOptimumSearchSchemes<3>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, kucerrors_3_parts_k_plus_2, KucherovOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_3_parts_k_plus_1, PaperOptimumSearchSchemes<3>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_HammingDistance, errors_3_parts_k_plus_2, PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, besterrors_3_parts, OptimalSearchSchemes<0,3>::VALUE)->Unit(benchmark::kMillisecond);
 
+BENCHMARK_CAPTURE(BM_HammingDistance, kucerrors_4_parts_k_plus_1, KucherovOptimumSearchSchemes<4>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, kucerrors_4_parts_k_plus_2, KucherovOptimumSearchSchemes<4>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, besterrors_4_parts, OptimalSearchSchemes<0,4>::VALUE)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_parts_k_plus_1, PaperOptimumSearchSchemes<4>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(BM_HammingDistance, errors_4_parts_k_plus_2, PaperOptimumSearchSchemes<4>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
+
+
+/*
 BENCHMARK_CAPTURE(BM_EditDistance, errors_1_backtracking  , (uint8_t)1)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_EditDistance, errors_1_parts_k_plus_1, PaperOptimumSearchSchemes<1>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_EditDistance, errors_1_parts_k_plus_2, PaperOptimumSearchSchemes<1>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
@@ -216,7 +231,7 @@ BENCHMARK_CAPTURE(BM_EditDistance, errors_2_parts_k_plus_2, PaperOptimumSearchSc
 BENCHMARK_CAPTURE(BM_EditDistance, errors_3_backtracking  , (uint8_t)3)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_EditDistance, errors_3_parts_k_plus_1, PaperOptimumSearchSchemes<3>::VALUE_plus_one)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(BM_EditDistance, errors_3_parts_k_plus_2, PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
-
+*/
 // BENCHMARK_MAIN();
 int main(int argc, char** argv)
 {

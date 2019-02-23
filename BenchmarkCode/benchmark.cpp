@@ -1,8 +1,9 @@
-
 #include <benchmark/benchmark.h>
 #include <seqan/arg_parse.h>
 #include <seqan/index.h>
 #include <seqan/seq_io.h>
+
+#include <sdsl/bit_vectors.hpp>
 
 #include <type_traits>
 
@@ -11,6 +12,7 @@
 #include "paper_optimum_schemes.h"
 #include "find2_index_approx_extension.h"
 
+using namespace sdsl;
 using namespace seqan;
 
 typedef Index<StringSet<String<Dna, Alloc<>>, Owner<ConcatDirect<> > >, TIndexConfig> TIndex;
@@ -18,6 +20,10 @@ typedef Iter<TIndex, VSTree<TopDown<> > > TIter;
 
 TIndex fm_index;
 StringSet<DnaString> reads;
+
+//typedef sdsl::bit_vector TBitvector;
+//typedef sdsl::rank_support_v<> TSupport;
+vector<pair<TBitvector, TSupport>> bv_1_7;
 
 uint64_t no_verifications;
 
@@ -70,9 +76,9 @@ void OSS_AnyDistance(benchmark::State& state, TOSSContext & ossContext, TSearchS
         for (unsigned i = 0; i < length(reads); ++i)
         {
             uint64_t oldHits = hitsNbr;
-            find(ossContext, delegate, delegateDirect, it, empty_bitvectors, scheme, reads[i], i, TDistanceTag());
+            //find(ossContext, delegate, delegateDirect, it, empty_bitvectors, scheme, reads[i], i, TDistanceTag());
             reverseComplement(reads[i]);
-            find(ossContext, delegate, delegateDirect, it, empty_bitvectors, scheme, reads[i], i, TDistanceTag());
+            //find(ossContext, delegate, delegateDirect, it, empty_bitvectors, scheme, reads[i], i, TDistanceTag());
             benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
         }
         // std::cout << "Backtracking: " << ((double)((time*100)/CLOCKS_PER_SEC)/100) << " s. ";
@@ -326,6 +332,61 @@ OSSContextIndex<1> ossContextIndex1;
 OSSContextIndex<2> ossContextIndex2;
 OSSContextIndex<3> ossContextIndex3;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+template <class TSearchScheme>
+void BM_Mappability(benchmark::State& state, TSearchScheme scheme, auto & bv)
+{
+    calcConstParameters(scheme);
+
+    uint64_t hitsNbr, uniqueHits, bla = 0;
+    auto delegate = [&bla](auto const & iter, DnaString const & /*needle*/, uint8_t /*errors*/, bool const /*rev*/)
+    {
+        for (auto occ : getOccurrences(iter))
+        {
+            bla += occ.i2;
+        }
+    };
+    auto delegateDirect = [&bla](Pair<uint16_t, uint32_t> const & pos, DnaString const & /*needle*/, uint8_t const /*errors*/)
+    {
+        bla += pos.i2;
+    };
+
+    for (auto _ : state)
+    {
+        hitsNbr = 0;
+        uniqueHits = 0;
+        for (unsigned i = 0; i < length(reads); ++i)
+        {
+            uint64_t oldHits = hitsNbr;
+	    std::cerr << "i = " << i << std::endl;
+            find(delegate, delegateDirect, fm_index, reads[i], bv, scheme);
+            reverseComplement(reads[i]);
+            //find(delegate, delegateDirect, fm_index, reads[i], bv, scheme);
+            benchmark::DoNotOptimize(uniqueHits += oldHits != hitsNbr);
+        }
+        std::cout << "Hits Mapp: " << uniqueHits << " (" << hitsNbr << ") bla: " << bla << std::endl; // Hits compare
+    }
+}
+
+BENCHMARK_CAPTURE(BM_Mappability, 1_OSS_mapp, OptimalSearchSchemes<0, 1>::VALUE, bv_1_7)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_off  , ossContextOff  , OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
 //BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_on   , ossContextOn  , OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(OSS_AnyDistance, 1_OSS_itv_occ25, ossContextOcc25, OptimalSearchSchemes<0, 1>::VALUE)->Unit(benchmark::kMillisecond);
@@ -467,16 +528,21 @@ int main(int argc, char** argv)
 	setValidValues(parser, "reads", "fa fasta fastq");
 	setRequired(parser, "reads");
 
+    addOption(parser, ArgParseOption("B", "bitvector", "Path to the bitvectors", ArgParseArgument::INPUT_FILE, "IN"));
+	setRequired(parser, "bitvector");
+
     ArgumentParser::ParseResult res = parse(parser, argc, argv);
     if (res != ArgumentParser::PARSE_OK)
         return res == ArgumentParser::PARSE_ERROR;
 
     // Retrieve input parameters
-    CharString indexPath, readsPath;
+    CharString indexPath, readsPath, bitvectorPath;
     getOptionValue(indexPath, parser, "genome");
     getOptionValue(readsPath, parser, "reads");
+    getOptionValue(bitvectorPath, parser, "bitvector");
 
     open(fm_index, toCString(indexPath), OPEN_RDONLY);
+    std::cerr << "Index loaded." << std::endl;
     StringSet<CharString> ids;
     SeqFileIn seqFileIn(toCString(readsPath));
     readRecords(ids, reads, seqFileIn);
@@ -489,6 +555,15 @@ int main(int argc, char** argv)
             return 1;
         }
     }
+    std::cerr << "Reads loaded." << std::endl;
+
+
+    params.normal.setbestnormalhg();
+    params.copyDirectsearchParamsfromNormal();
+    params.normal.suspectunidirectional = false;
+
+    bv_1_7 = loadBitvectors(bitvectorPath, 101, 1);
+    std::cerr << "Bitvectors loaded." << std::endl;
 
     ::benchmark::Initialize(&argc, argv);
     ::benchmark::RunSpecifiedBenchmarks();

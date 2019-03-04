@@ -1,0 +1,3 @@
+[submodule "BenchmarkCode/seqan"]
+	path = BenchmarkCode/seqan
+	url = https://github.com/svnbgnk/seqan

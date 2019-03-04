@@ -125,6 +125,18 @@ BENCHMARK_CAPTURE(OSS_AnyDistance, 3_OSS_itv_occ25, ossContextOcc25 , PaperOptim
 BENCHMARK_CAPTURE(OSS_AnyDistance, 3_OSS_itv_occ50, ossContextOcc50 , PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
 BENCHMARK_CAPTURE(OSS_AnyDistance, 3_OSS_itv_ind1 , ossContextIndex1, PaperOptimumSearchSchemes<3>::VALUE_plus_two)->Unit(benchmark::kMillisecond);
 
+BENCHMARK_CAPTURE(OSS_AnyDistance, 1_BACK_itv_off  , ossContextOff   , BacktrackingSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 1_BACK_itv_occ25, ossContextOcc25 , BacktrackingSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 1_BACK_itv_occ50, ossContextOcc50 , BacktrackingSchemes<1>::VALUE)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_CAPTURE(OSS_AnyDistance, 2_BACK_itv_off  , ossContextOff   , BacktrackingSchemes<2>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 2_BACK_itv_occ25, ossContextOcc25 , BacktrackingSchemes<2>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 2_BACK_itv_occ50, ossContextOcc50 , BacktrackingSchemes<2>::VALUE)->Unit(benchmark::kMillisecond);
+
+BENCHMARK_CAPTURE(OSS_AnyDistance, 3_BACK_itv_off  , ossContextOff   , BacktrackingSchemes<3>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 3_BACK_itv_occ25, ossContextOcc25 , BacktrackingSchemes<3>::VALUE)->Unit(benchmark::kMillisecond);
+BENCHMARK_CAPTURE(OSS_AnyDistance, 3_BACK_itv_occ50, ossContextOcc50 , BacktrackingSchemes<3>::VALUE)->Unit(benchmark::kMillisecond);
+
 // BENCHMARK_MAIN();
 int main(int argc, char** argv)
 {

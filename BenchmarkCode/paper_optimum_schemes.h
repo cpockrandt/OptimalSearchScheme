@@ -2,6 +2,18 @@
 
 using namespace seqan;
 
+template <size_t max, typename TVoidType = void>
+struct BacktrackingSchemes
+{
+    static constexpr std::array<OptimalSearch<1>, 1> VALUE
+    {{
+        { {{1}}, {{0}}, {{max}}, {{0}}, 0 }
+    }};
+};
+
+template <size_t max, typename TVoidType>
+constexpr std::array<OptimalSearch<1>, 1> BacktrackingSchemes<max, TVoidType>::VALUE;
+
 // Contains Optimum Search Schemes from the paper for errors K = 1, ..., 4 and parts P = K+1, ... K+3
 
 template <size_t max, typename TVoidType = void>
